@@ -456,6 +456,53 @@
                 transform: scale(0.9);
             }
         }
+
+        /* Music Control Button */
+        .music-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .music-btn.playing {
+            animation: pulse-music 2s infinite;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes pulse-music {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
     </style>
 </head>
 
@@ -468,6 +515,16 @@
         <div id="starfield"></div>
         <div id="fireflyField"></div>
     </div>
+
+    <!-- Audio Player -->
+    <audio id="bgMusic" loop>
+        <source src="media/Ap Dhillon - With You.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <button id="musicToggle" class="music-btn" title="Play/Pause Music">
+        🎵
+    </button>
 
     <div class="overlay" id="overlay"></div>
 
@@ -673,6 +730,46 @@
         overlay.addEventListener('click', closeMemory);
 
         updateCounter();
+
+        // Music Control
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicToggle');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicBtn.classList.remove('playing');
+                musicBtn.innerHTML = '🎵'; // Music Note
+                musicBtn.style.opacity = '0.7';
+            } else {
+                bgMusic.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.classList.add('playing');
+                    musicBtn.innerHTML = '⏸'; // Pause icon
+                    musicBtn.style.opacity = '1';
+                }).catch(e => {
+                    console.log("Audio play failed:", e);
+                });
+            }
+            isPlaying = !isPlaying;
+        }
+
+        musicBtn.addEventListener('click', toggleMusic);
+
+        // Optional: Try to play on first interaction
+        document.body.addEventListener('click', function () {
+            if (!isPlaying) {
+                // We try once
+                bgMusic.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.classList.add('playing');
+                    musicBtn.innerHTML = '⏸';
+                }).catch(() => {
+                    // Autoplay prevented, waiting for explicit button click
+                });
+            }
+        }, { once: true });
     </script>
 </body>
 
